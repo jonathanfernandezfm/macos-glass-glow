@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Reactive Border</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/Draggable.min.js"></script>
+
+		<style>
+			body {
+				margin: 0;
+				height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: #121212;
+				overflow: hidden;
+			}
+
+			.box {
+				position: absolute;
+				width: 300px;
+				height: 400px;
+				background: linear-gradient(135deg, #1e1e1e88, #12121288);
+				z-index: 100;
+				overflow: hidden;
+				clip: rect(0, auto, auto, 0);
+				backdrop-filter: blur(6px) saturate(0.9);
+			}
+
+			.box::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background: color-mix(in oklch, canvasText, #0000 85%);
+				-webkit-mask: linear-gradient(#0000 0 100%) padding-box, linear-gradient(#fff 0 100%) border-box;
+				mask: linear-gradient(#0000 0 100%) padding-box, linear-gradient(#fff 0 100%) border-box;
+				-webkit-mask-composite: source-in, xor;
+				mask-composite: intersect;
+				z-index: 500;
+			}
+
+			.box::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border: 2px solid #0000;
+				background: canvasText;
+				-webkit-mask: linear-gradient(#0000 0 100%) padding-box, linear-gradient(#fff 0 100%) border-box;
+				mask: linear-gradient(#0000 0 100%) padding-box, linear-gradient(#fff 0 100%) border-box;
+				-webkit-mask-composite: source-in, xor;
+				mask-composite: intersect;
+				filter: url(#lighting);
+			}
+
+			.item {
+				width: 80px;
+				height: 80px;
+				background: linear-gradient(135deg, #1d1d1d, #141414);
+				border: 2px solid #1d1d1d;
+				border-radius: 12px;
+				position: absolute;
+				cursor: grab;
+			}
+
+			.image {
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: cover;
+				z-index: 50;
+			}
+
+			.item:active {
+				cursor: grabbing;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="box">
+			<div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 8px; z-index: 600">
+				<div style="width: 12px; height: 12px; background-color: #ff5f57; border-radius: 50%"></div>
+				<div style="width: 12px; height: 12px; background-color: #ffbd2e; border-radius: 50%"></div>
+				<div style="width: 12px; height: 12px; background-color: #28c840; border-radius: 50%"></div>
+			</div>
+
+			<svg class="filter" xmlns="http://www.w3.org/2000/svg" style="touch-action: none">
+				<filter id="lighting" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%" style="touch-action: none">
+					<!-- Light sources -->
+					<feSpecularLighting in="SourceAlpha" result="light1" id="light1" specularConstant="12" specularExponent="150" surfaceScale="1" lighting-color="#7e88f5" style="touch-action: none">
+						<fePointLight x="-84" y="252.671875" z="170" style="touch-action: none"></fePointLight>
+					</feSpecularLighting>
+					<feSpecularLighting in="SourceAlpha" result="light2" id="light2" specularConstant="12" specularExponent="110" surfaceScale="1" lighting-color="#722fc5" style="touch-action: none">
+						<fePointLight x="237" y="-50.328125" z="170" style="touch-action: none"></fePointLight>
+					</feSpecularLighting>
+
+					<feSpecularLighting in="SourceAlpha" result="light3" id="light3" specularConstant="12" specularExponent="110" surfaceScale="1" lighting-color="#ff6060" style="touch-action: none">
+						<fePointLight x="-63" y="-41.328125" z="170" style="touch-action: none"></fePointLight>
+					</feSpecularLighting>
+					<feSpecularLighting in="SourceAlpha" result="light4" id="light4" specularConstant="12" specularExponent="120" surfaceScale="1" lighting-color="#1cd861" style="touch-action: none">
+						<fePointLight x="270" y="253.671875" z="170" style="touch-action: none"></fePointLight>
+					</feSpecularLighting>
+
+					<!-- Blend lights pair by pair -->
+					<feBlend in="light1" in2="light2" mode="screen" result="blend12" style="touch-action: none"></feBlend>
+					<feBlend in="light3" in2="light4" mode="screen" result="blend34" style="touch-action: none"></feBlend>
+					<feBlend in="blend12" in2="blend34" mode="screen" result="allLights" style="touch-action: none"></feBlend>
+
+					<!-- Apply lighting over shape -->
+					<feComposite in="allLights" in2="SourceGraphic" operator="in" result="litShape" style="touch-action: none"></feComposite>
+					<feMerge style="touch-action: none">
+						<feMergeNode in="litShape" style="touch-action: none"></feMergeNode>
+					</feMerge>
+				</filter>
+			</svg>
+		</div>
+
+		<div class="item" style="top: 40%; left: 32%; display: flex; align-items: center; justify-content: center; --light: light1">
+			<div class="image" style="width: 70%; height: 70%; border-radius: 12px; background-image: url('/images/discord-icon-svgrepo-com.svg')"></div>
+		</div>
+		<div class="item" style="top: 50%; left: 62%; display: flex; align-items: center; justify-content: center; --light: light2">
+			<div class="image" style="width: 70%; height: 70%; border-radius: 12px; background-image: url('/images/twitch-tile.svg')"></div>
+		</div>
+		<div class="item" style="top: 74%; left: 50%; display: flex; align-items: center; justify-content: center; --light: light3">
+			<div class="image" style="width: 70%; height: 70%; border-radius: 12px; background-image: url('/images/airbnb-tile.svg')"></div>
+		</div>
+		<div class="item" style="top: 16%; left: 47%; display: flex; align-items: center; justify-content: center; --light: light4">
+			<div class="image" style="width: 70%; height: 70%; border-radius: 12px; background-image: url('/images/spotify-icon.svg')"></div>
+		</div>
+
+		<script>
+			const floatingItems = document.querySelectorAll('.item');
+			const box = document.querySelector('.box');
+
+			const syncLight = (control) => {
+				const { x, y, width, height } = control.getBoundingClientRect();
+				const { left, top } = box.getBoundingClientRect();
+				const lightX = x + width * 0.5 - left;
+				const lightY = y + height * 0.5 - top;
+				console.log(control.style.getPropertyValue('--light'));
+				gsap.set(`#${control.style.getPropertyValue('--light')} fePointLight`, {
+					attr: {
+						x: lightX,
+						y: lightY,
+					},
+				});
+			};
+
+			for (const icon of floatingItems) {
+				Draggable.create(icon, {
+					type: 'x,y',
+					onDrag: () => {
+						syncLight(icon);
+					},
+				});
+				syncLight(icon);
+			}
+
+			Draggable.create(box, {
+				type: 'x,y',
+				onDrag: () => {
+					for (const icon of floatingItems) syncLight(icon);
+				},
+			});
+		</script>
+	</body>
+</html>
